@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import api from '../api/api';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -17,45 +20,49 @@ const Register = () => {
       const res = await api.post('/users/register', { name, email, password });
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data));
-      toast.success('Registration successful!');
       navigate('/');
     } catch (err) {
       setError('Registration failed');
-      toast.error('Registration failed');
     }
   };
 
   return (
     <div className="max-w-md mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Register</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Name"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          className="w-full border p-2 rounded"
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          className="w-full border p-2 rounded"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          className="w-full border p-2 rounded"
-          required
-        />
-        {error && <div className="text-red-500">{error}</div>}
-        <button className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Register</button>
-      </form>
+      <Card>
+        <CardContent className="p-8">
+          <CardTitle className="mb-6">Register</CardTitle>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              type="text"
+              placeholder="Name"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              required
+            />
+            <Input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+            />
+            <Input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+            />
+            {error && (
+              <Alert variant="destructive">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <Button className="w-full" type="submit">Register</Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 };

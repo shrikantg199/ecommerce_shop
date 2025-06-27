@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import api from '../../api/api';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { Form, FormItem, FormLabel, FormControl, FormMessage, FormField } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 const ProductForm = ({ onSubmit, product, onCancel }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    price: '',
-    description: '',
-    imageUrl: '',
-    countInStock: '',
-    category: '',
-  });
   const [uploading, setUploading] = useState(false);
+  const [imageUrl, setImageUrl] = useState(product?.imageUrl || '');
 
   const categories = [
     'Electronics',
@@ -22,9 +22,20 @@ const ProductForm = ({ onSubmit, product, onCancel }) => {
     'Other',
   ];
 
+  const form = useForm({
+    defaultValues: {
+      name: product?.name || '',
+      price: product?.price || '',
+      description: product?.description || '',
+      imageUrl: product?.imageUrl || '',
+      countInStock: product?.countInStock || '',
+      category: product?.category || '',
+    },
+  });
+
   useEffect(() => {
     if (product) {
-      setFormData({
+      form.reset({
         name: product.name || '',
         price: product.price || '',
         description: product.description || '',
@@ -32,13 +43,10 @@ const ProductForm = ({ onSubmit, product, onCancel }) => {
         countInStock: product.countInStock || '',
         category: product.category || '',
       });
+      setImageUrl(product.imageUrl || '');
     }
+    // eslint-disable-next-line
   }, [product]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -54,7 +62,8 @@ const ProductForm = ({ onSubmit, product, onCancel }) => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setFormData((prev) => ({ ...prev, imageUrl: data.imageUrl }));
+      setImageUrl(data.imageUrl);
+      form.setValue('imageUrl', data.imageUrl);
     } catch (err) {
       alert('Image upload failed');
     } finally {
@@ -62,46 +71,107 @@ const ProductForm = ({ onSubmit, product, onCancel }) => {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(formData);
+  const handleSubmit = (values) => {
+    onSubmit({ ...values, imageUrl });
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white p-8 rounded-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6">{product ? 'Edit Product' : 'Create Product'}</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input name="name" value={formData.name} onChange={handleChange} placeholder="Name" className="w-full border p-2 rounded" required />
-          <input name="price" value={formData.price} onChange={handleChange} placeholder="Price" type="number" className="w-full border p-2 rounded" required />
-          <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Description" className="w-full border p-2 rounded" />
-          <div>
-            <input type="file" accept="image/*" onChange={handleImageUpload} />
-            {uploading && <div>Uploading...</div>}
-            {formData.imageUrl && (
-              <img src={formData.imageUrl} alt="Product" className="w-24 h-24 object-cover mt-2" />
-            )}
-          </div>
-          <input name="imageUrl" value={formData.imageUrl} onChange={handleChange} placeholder="Image URL" className="w-full border p-2 rounded" />
-          <input name="countInStock" value={formData.countInStock} onChange={handleChange} placeholder="Count in Stock" type="number" className="w-full border p-2 rounded" required />
-          <select
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="w-full border p-2 rounded"
-            required
-          >
-            <option value="" disabled>Select Category</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
-          <div className="flex justify-end space-x-4">
-            <button type="button" onClick={onCancel} className="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
-            <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">{product ? 'Update' : 'Create'}</button>
-          </div>
-        </form>
-      </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <Card className="w-full max-w-md">
+        <CardContent className="p-8">
+          <CardTitle className="text-2xl font-bold mb-6">{product ? 'Edit Product' : 'Create Product'}</CardTitle>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              <FormField name="name" control={form.control} rules={{ required: 'Name is required' }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField name="price" control={form.control} rules={{ required: 'Price is required' }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Price</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="Price" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField name="description" control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Description" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div>
+                <Input type="file" accept="image/*" onChange={handleImageUpload} />
+                {uploading && <div className="text-sm mt-1">Uploading...</div>}
+                {imageUrl && (
+                  <img src={imageUrl} alt="Product" className="w-24 h-24 object-cover mt-2 rounded" />
+                )}
+              </div>
+              <FormField name="imageUrl" control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Image URL</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Image URL" {...field} value={imageUrl} onChange={e => { field.onChange(e); setImageUrl(e.target.value); }} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField name="countInStock" control={form.control} rules={{ required: 'Count in stock is required' }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Count in Stock</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="Count in Stock" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField name="category" control={form.control} rules={{ required: 'Category is required' }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <FormControl>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end space-x-4">
+                <Button type="button" variant="secondary" onClick={onCancel}>Cancel</Button>
+                <Button type="submit">{product ? 'Update' : 'Create'}</Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
     </div>
   );
 };
