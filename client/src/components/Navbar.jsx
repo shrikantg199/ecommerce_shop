@@ -26,6 +26,8 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 import { Menu, ShoppingCart, User as UserIcon, ChevronDown } from 'lucide-react';
+import api from '../api/api';
+import logo from '../assets/logo.png';
 
 const Navbar = () => {
   const user = JSON.parse(localStorage.getItem('user'));
@@ -48,10 +50,31 @@ const Navbar = () => {
     }
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user) {
+      const cart = localStorage.getItem('cart');
+      if (cart) {
+        try {
+          await api.post('/users/cart', { cart: JSON.parse(cart) });
+        } catch (err) {
+          // Optionally handle error
+        }
+      }
+    }
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('cart');
     navigate('/login');
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (search.trim()) {
+      navigate(`/?search=${encodeURIComponent(search.trim())}`);
+    } else {
+      navigate('/');
+    }
   };
 
   return (
@@ -61,13 +84,13 @@ const Navbar = () => {
           {/* Left: Logo */}
           <div className="flex items-center gap-2 min-w-[120px]">
             <NavLink to="/" className="flex items-center gap-1">
-              <ShoppingCart className="h-7 w-7 text-white" />
-              <span className="text-2xl font-bold text-white">eShop</span>
+              <img src={logo} alt="Logo" className="h-10 w-10 object-contain" />
+              <span className="text-2xl font-bold text-white">Buzzbasket</span>
             </NavLink>
           </div>
           {/* Center: Search Bar */}
           <div className="flex-1 flex justify-center mx-2">
-            <form className="w-full max-w-xl flex" onSubmit={e => e.preventDefault()}>
+            <form className="w-full max-w-xl flex" onSubmit={handleSearchSubmit}>
               <input
                 type="text"
                 placeholder="Search for products, brands and more"
@@ -103,38 +126,33 @@ const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
             {/* Cart */}
-            <NavLink to="/cart" className="relative text-white hover:text-yellow-400">
-              <ShoppingCart className="h-6 w-6" />
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-yellow-400 text-[#2874f0] text-xs rounded-full h-5 w-5 flex items-center justify-center">{cartCount}</span>
-              )}
-            </NavLink>
+            {user ? (
+              <NavLink to="/cart" className="relative text-white hover:text-yellow-400">
+                <ShoppingCart className="h-6 w-6" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-yellow-400 text-[#2874f0] text-xs rounded-full h-5 w-5 flex items-center justify-center">{cartCount}</span>
+                )}
+              </NavLink>
+            ) : (
+              <button onClick={() => navigate('/login')} className="relative text-white hover:text-yellow-400">
+                <ShoppingCart className="h-6 w-6" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-yellow-400 text-[#2874f0] text-xs rounded-full h-5 w-5 flex items-center justify-center">{cartCount}</span>
+                )}
+              </button>
+            )}
             {/* Login/Profile */}
             {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 text-white focus:outline-none">
-                    {user.profileImageUrl ? (
-                      <img src={user.profileImageUrl} alt={user.name} className="w-8 h-8 rounded-full" />
-                    ) : (
-                      <UserIcon className="w-8 h-8 rounded-full bg-white/20 p-1" />
-                    )}
-                    <span>{user.name}</span>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={() => navigate('/profile')}>Profile</DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => navigate('/my-orders')}>My Orders</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={handleLogout} className="text-red-600 focus:text-red-700 focus:bg-red-50">
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <>
+                <NavLink to="/profile" className="bg-white text-[#2874f0] px-4 py-1 rounded font-semibold hover:bg-blue-100">Profile</NavLink>
+                <NavLink to="/my-orders" className="bg-white text-[#2874f0] px-4 py-1 rounded font-semibold hover:bg-blue-100 ml-2">My Orders</NavLink>
+                <button onClick={handleLogout} className="bg-white text-[#2874f0] px-4 py-1 rounded font-semibold hover:bg-blue-100 ml-2">Logout</button>
+              </>
             ) : (
-              <NavLink to="/login" className="bg-white text-[#2874f0] px-4 py-1 rounded font-semibold hover:bg-blue-100">Login</NavLink>
+              <>
+                <NavLink to="/login" className="bg-white text-[#2874f0] px-4 py-1 rounded font-semibold hover:bg-blue-100">Login</NavLink>
+                <NavLink to="/register" className="bg-[#ffe500] text-[#2874f0] px-4 py-1 rounded font-semibold hover:bg-yellow-200 ml-2">Register</NavLink>
+              </>
             )}
           </div>
           {/* Mobile: Hamburger */}
@@ -145,7 +163,7 @@ const Navbar = () => {
               </DrawerTrigger>
               <DrawerContent>
                 <DrawerHeader>
-                  <DrawerTitle>eShop</DrawerTitle>
+                  <DrawerTitle>Buzzbasket</DrawerTitle>
                 </DrawerHeader>
                 <div className="px-4">
                   <NavigationMenu className="w-full">
@@ -179,7 +197,7 @@ const Navbar = () => {
                     </NavigationMenuList>
                   </NavigationMenu>
                   {/* Mobile Search Bar */}
-                  <form className="w-full mt-4 flex " onSubmit={e => e.preventDefault()}>
+                  <form className="w-full mt-4 flex " onSubmit={handleSearchSubmit}>
                     <input
                       type="text"
                       placeholder="Search for products, brands and more"

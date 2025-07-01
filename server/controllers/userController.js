@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const cloudinary = require('../utils/cloudinary');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -71,4 +72,71 @@ const getUsers = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getUsers }; 
+const getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+const updateUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    user.name = req.body.name || user.name;
+    user.address = req.body.address || user.address;
+    if (req.file) {
+      // Upload new profile image to Cloudinary
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'profile_images',
+      });
+      user.profileImageUrl = result.secure_url;
+    } else if (req.body.profileImageUrl) {
+      user.profileImageUrl = req.body.profileImageUrl;
+    }
+    await user.save();
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      address: user.address,
+      profileImageUrl: user.profileImageUrl,
+      createdAt: user.createdAt,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Get user cart
+const getCart = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user.cart || []);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Update user cart
+const updateCart = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    user.cart = req.body.cart;
+    await user.save();
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+module.exports = { registerUser, loginUser, getUsers, getUserProfile, updateUserProfile, getCart, updateCart }; 

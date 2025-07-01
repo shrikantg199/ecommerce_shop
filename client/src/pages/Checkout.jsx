@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { loadStripe } from '@stripe/stripe-js';
 
 const Checkout = () => {
   const [address, setAddress] = useState('');
@@ -27,8 +26,6 @@ const Checkout = () => {
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const token = localStorage.getItem('token');
 
-  const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-
   if (!token) {
     navigate('/login');
     return null;
@@ -43,17 +40,6 @@ const Checkout = () => {
       setDiscount(0);
       setCouponApplied(false);
       alert('Invalid coupon code');
-    }
-  };
-
-  const handleStripeCheckout = async () => {
-    try {
-      const response = await api.post('/create-checkout-session', { cart }, { headers: { Authorization: `Bearer ${token}` } });
-      const sessionId = response.data.sessionId;
-      const stripe = await stripePromise;
-      await stripe.redirectToCheckout({ sessionId });
-    } catch (err) {
-      setError('Stripe payment failed. Please try again.');
     }
   };
 
@@ -192,7 +178,6 @@ const Checkout = () => {
                 className="w-full"
                 type="button"
                 disabled={loading || cart.length === 0}
-                onClick={handleStripeCheckout}
               >
                 Pay with Card
               </Button>

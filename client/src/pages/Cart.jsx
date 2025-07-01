@@ -11,7 +11,9 @@ const Cart = () => {
 
   useEffect(() => {
     const stored = localStorage.getItem('cart');
-    setCart(stored ? JSON.parse(stored) : []);
+    let items = stored ? JSON.parse(stored) : [];
+    items = items.filter(item => item.quantity > 0);
+    setCart(items);
   }, []);
 
   const handleRemove = (id) => {

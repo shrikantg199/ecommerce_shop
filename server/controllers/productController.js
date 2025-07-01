@@ -7,7 +7,12 @@ const Order = require('../models/Order');
 // @access  Public
 const getProducts = async (req, res) => {
   try {
-    const products = await Product.find({});
+    const search = req.query.search;
+    let query = {};
+    if (search) {
+      query = { name: { $regex: search, $options: 'i' } };
+    }
+    const products = await Product.find(query);
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: 'Server Error' });

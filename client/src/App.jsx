@@ -14,6 +14,7 @@ import Checkout from './pages/Checkout';
 import Layout from './components/Layout';
 import Order from './pages/Order';
 import MyOrders from './pages/MyOrders';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
               <Orders />
             </ProtectedRoute>
           } />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </Layout>
     </Router>

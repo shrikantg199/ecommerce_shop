@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { ArrowLeft } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 const Product = () => {
   const { id } = useParams();
@@ -29,7 +30,12 @@ const Product = () => {
     fetchProduct();
   }, [id]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+      toast.error('Please log in first');
+      return;
+    }
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     const existing = cart.find(item => item._id === product._id);
     if (existing) {
@@ -39,6 +45,12 @@ const Product = () => {
     }
     localStorage.setItem('cart', JSON.stringify(cart));
     window.dispatchEvent(new Event('cart-updated'));
+    // Save cart to backend
+    try {
+      await api.post('/users/cart', { cart });
+    } catch (err) {
+      // Optionally handle error
+    }
     navigate('/cart');
   };
 
@@ -88,7 +100,35 @@ const Product = () => {
           <div className="flex flex-col justify-between">
             <div>
               <CardTitle className="text-3xl font-bold mb-2">{product.name}</CardTitle>
-              <p className="text-gray-700 mb-4">{product.description}</p>
+              {/* Description Section */}
+              <div className="mb-6">
+                <h3 className="font-semibold text-lg mb-1 text-gray-800 border-b pb-1">Description</h3>
+                <p className="text-gray-700 text-base leading-relaxed">{product.description}</p>
+              </div>
+              {/* Specifications Section (Mock Data) */}
+              <div className="mb-6">
+                <h3 className="font-semibold text-lg mb-2 text-gray-800 border-b pb-1">Specifications</h3>
+                <table className="w-full bg-gray-50 border rounded text-sm">
+                  <tbody>
+                    <tr className="border-b">
+                      <td className="py-2 px-3 font-medium text-gray-700 w-1/3">Brand</td>
+                      <td className="py-2 px-3 text-gray-900">eShop</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="py-2 px-3 font-medium text-gray-700">Model</td>
+                      <td className="py-2 px-3 text-gray-900">Standard</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="py-2 px-3 font-medium text-gray-700">Color</td>
+                      <td className="py-2 px-3 text-gray-900">Black</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-3 font-medium text-gray-700">Warranty</td>
+                      <td className="py-2 px-3 text-gray-900">1 Year</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
               <div className="flex items-center gap-4 mb-4">
                 <span className="text-2xl font-bold text-gray-900">₹{product.price}</span>
                 {product.originalPrice && (

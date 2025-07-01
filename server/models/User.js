@@ -6,7 +6,11 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   isAdmin: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  profileImageUrl: { type: String },
+  address: { type: String },
+  orderHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
+  cart: { type: Array, default: [] }
 });
 
 userSchema.pre('save', async function (next) {
