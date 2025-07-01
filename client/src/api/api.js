@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://ecommerce-shop-kyma.vercel.app/api', // Change to your backend URL
+  baseURL: 'https://ecommerce-shop-2gfc.onrender.com/api', // Change to your backend URL
 });
 
 // Add a request interceptor to attach the token
