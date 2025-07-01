@@ -1,0 +1,88 @@
+# Project Overview
+
+This project is a MERN (MongoDB, Express, React, Node.js) stack e-commerce application. It allows users to browse products, manage their cart, place orders, and handle user authentication. The project is divided into two main parts: the frontend (client) and the backend (server).
+
+# File Structure
+
+ecom/
+  ├── client/                # React frontend application
+  │   ├── components.json
+  │   ├── eslint.config.js
+  │   ├── index.html
+  │   ├── jsconfig.json
+  │   ├── package-lock.json
+  │   ├── package.json
+  │   ├── public/
+  │   │   ├── favicon.ico
+  │   │   └── vite.svg
+  │   ├── README.md
+  │   ├── src/
+  │   │   ├── api/
+  │   │   │   └── api.js
+  │   │   ├── App.css
+  │   │   ├── App.jsx
+  │   │   ├── assets/
+  │   │   │   ├── logo.png
+  │   │   │   └── react.svg
+  │   │   ├── components/
+  │   │   │   ├── Admin/
+  │   │   │   │   └── ProductForm.jsx
+  │   │   │   ├── Footer.jsx
+  │   │   │   ├── Layout.jsx
+  │   │   │   ├── Navbar.jsx
+  │   │   │   ├── ProductCard.jsx
+  │   │   │   ├── ProtectedRoute.jsx
+  │   │   │   └── ui/
+  │   │   │       └── ... (various UI components)
+  │   │   ├── context/
+  │   │   │   └── CartContext.jsx
+  │   │   ├── hooks/
+  │   │   │   └── use-mobile.js
+  │   │   ├── index.css
+  │   │   ├── lib/
+  │   │   │   └── utils.js
+  │   │   ├── main.jsx
+  │   │   └── pages/
+  │   │       ├── Admin/
+  │   │       │   ├── Dashboard.jsx
+  │   │       │   ├── Orders.jsx
+  │   │       │   └── Products.jsx
+  │   │       ├── Cart.jsx
+  │   │       ├── Checkout.jsx
+  │   │       ├── Home.jsx
+  │   │       ├── Login.jsx
+  │   │       ├── MyOrders.jsx
+  │   │       ├── Order.jsx
+  │   │       ├── Product.jsx
+  │   │       ├── Profile.jsx
+  │   │       └── Register.jsx
+  │   ├── tailwind.config.js
+  │   └── vite.config.js
+  ├── server/                # Node.js/Express backend application
+  │   ├── controllers/
+  │   │   ├── orderController.js
+  │   │   ├── productController.js
+  │   │   └── userController.js
+  │   ├── index.js
+  │   ├── middleware/
+  │   │   └── authMiddleware.js
+  │   ├── models/
+  │   │   ├── Order.js
+  │   │   ├── Product.js
+  │   │   └── User.js
+  │   ├── package-lock.json
+  │   ├── package.json
+  │   ├── routes/
+  │   │   ├── orderRoutes.js
+  │   │   ├── productRoutes.js
+  │   │   └── userRoutes.js
+  │   └── utils/
+  │       ├── cloudinary.js
+  │       └── multer.js
+  └── text.txt               # Project documentation and notes
+
+# Deployment
+
+- Frontend: Deployed on Vercel
+- Backend: Deployed on Render
+
